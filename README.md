@@ -1,7 +1,5 @@
 # Remote Job Execution System
 
-This project is a distributed remote job execution system, consisting of three main components:
-
 - **betterMQ**: A custom message queue and job management library
 - **server**: The backend API and real-time gateway
 - **client**: The frontend web application for users
@@ -70,31 +68,5 @@ remote-job-execution-system/
 - Connects to the server via REST API and Socket.IO for real-time updates
 
 ---
+![brave_screenshot_localhost](https://github.com/user-attachments/assets/3e14d91a-eaab-49ac-8b30-9a0ee325b1eb)
 
-## How They Work Together
-
-1. **User submits a job** via the client UI
-2. **Client** sends a request to the **server** (`/add` endpoint)
-3. **Server** adds the job to the queue using **betterMQ**
-4. **Worker/RemoteWorker** (from betterMQ) picks up the job, executes it (locally or via SSH), and updates job status/logs in Redis
-5. **Server** emits real-time updates (logs, status) to the **client** via Socket.IO
-6. **Client** displays job progress, logs, and details in the UI
-
----
-
-## Development
-
-- Each folder (`betterMQ`, `server`, `client`) is a separate Node.js project with its own dependencies and scripts
-- Start the server and client separately for development
-- The betterMQ library can be developed and tested independently
-
----
-
-## Notes
-- Redis must be running and accessible to both server and workers
-- Remote job execution uses SSH (see `RemoteWorker` config)
-- All job and log data is stored in Redis
-
----
-
-For more details, see the source code in each folder. 
