@@ -8,6 +8,7 @@ import path from "path";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from 'socket.io';
+import dotenv from "dotenv"
 
 const execAsync = promisify(exec);
 
@@ -15,6 +16,11 @@ const privateKey = fs.readFileSync(path.resolve(__dirname, "../src/sk-remote.pem
 
 const app = express();
 app.use(bodyParser.json());
+
+
+dotenv.config()
+
+const host = process.env.host
 
 // Create HTTP server and Socket.IO server
 const httpServer = createServer(app);
@@ -37,7 +43,7 @@ const remoteWorker = new RemoteWorker("queue:test", {
     url: "redis://localhost:6379"
 },
     {
-        host: "ec2-13-53-182-175.eu-north-1.compute.amazonaws.com",
+        host: host as string,
         port: 22,
         username: "ec2-user",
         privateKey: privateKey
