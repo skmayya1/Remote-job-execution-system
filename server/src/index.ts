@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
-import { Queue, RemoteWorker, Worker } from "bettermq";
+import { Queue, RemoteWorker } from "bettermq";
 
 import fs from "fs";
 import path from "path";
@@ -9,14 +9,14 @@ import { createServer } from "http";
 import { Server } from 'socket.io';
 import dotenv from "dotenv"
 
+dotenv.config()
+
+
 
 const privateKey = fs.readFileSync(path.resolve(__dirname, "../src/sk-remote.pem"));
 
 const app = express();
 app.use(bodyParser.json());
-
-
-dotenv.config()
 
 const host = process.env.host
 
@@ -33,12 +33,14 @@ app.use(cors({
     origin: "*"
 }));
 
+const redis_url = process.env.redisUrl || "redis://localhost:6379"
+
 const queue = new Queue("queue:test", {
-    url: "redis://localhost:6379"
+    url: redis_url
 });
 
 const remoteWorker = new RemoteWorker("queue:test", {
-    url: "redis://localhost:6379"
+    url: redis_url
 },
     {
         host: host as string,

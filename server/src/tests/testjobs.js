@@ -22,6 +22,7 @@ const simulateWorker = async ( ) => {
   }
 };
 
+//we are popping the job from redis list  so the reace conidtin for mutiple worker taking same job is nil
 const main = async () => {
   console.log("=== Submitting race test job concurrently ===");
   await Promise.all([
