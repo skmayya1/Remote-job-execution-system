@@ -6,8 +6,6 @@
     COPY /package*.json ./server/
     COPY ../betterMQ  ./betterMQ
     
-    RUN npm install
-
     COPY . .
 
 
@@ -15,6 +13,7 @@
     RUN npm install && npx tsc
 
     WORKDIR /app/server
+    RUN npm install
     RUN npx tsc --workspace=server
     
     EXPOSE 5000
