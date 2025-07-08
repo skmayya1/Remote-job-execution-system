@@ -179,7 +179,7 @@ app.get("/jobs/:id/metrics", async (req: Request, res: Response) => {
 });
 
 
-httpServer.listen(6000, () => {
+httpServer.listen(5000, () => {
     console.log("Server running on port 5000");
     console.log("Socket.IO server initialized");
 });
