@@ -44,7 +44,7 @@ remote-job-execution-system/
 
 ## How it Works
 1. **User submits a job** (command or script) via the web UI.
-2. **Server** adds the job to the queue (Redis), exposes REST endpoints for job CRUD, logs, and metrics.
+2. **Server** adds the job to the queue, exposes REST endpoints for job CRUD, logs, and metrics.
 3. **RemoteWorker** picks up jobs, executes them via SSH, streams logs, updates status, and collects system metrics.
 4. **Client** shows job status, logs, and metrics in real time.
 
