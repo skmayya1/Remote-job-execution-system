@@ -3,6 +3,7 @@ import { Worker } from "./index"
 
 import { Client } from "ssh2";
 
+import { blacklistedPatterns } from "./utils"
 export class RemoteWorker extends Worker {
     private SSHConfig: SSHConfig;
 
@@ -92,6 +93,13 @@ export class RemoteWorker extends Worker {
             const conn = new Client();
             let hasStderr = false;
             let commandExecutionFailed = false; // Flag to track if the main command failed
+
+            if (blacklistedPatterns.some(p => p.test(command))) {
+                 this.updateState(jobId, "failed");
+                this.Logger?.(jobId, `Blocked dangerous command: ${command}`);
+                return;
+            }
+
 
             conn.on("ready", () => {
                 conn.exec(command, (err, stream) => {
