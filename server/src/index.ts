@@ -11,9 +11,9 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
+// "../src/sk-remote.pem"
 
-
-const privateKey = fs.readFileSync(path.resolve(__dirname, "../src/sk-remote.pem"));
+const privateKey = fs.readFileSync(path.resolve(__dirname, "/etc/secrets/sk-remote.pem"));
 
 const app = express();
 app.use(bodyParser.json());
