@@ -5,6 +5,9 @@ import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { JobMetaData } from './Jobs/columns';
 import axios from 'axios';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ||"http://localhost:5000"
+
+
 interface JobDetailsViewerProps {
   job: JobMetaData | null;
   isOpen: boolean;
@@ -60,7 +63,7 @@ const JobDetailsViewer: React.FC<JobDetailsViewerProps> = ({ job, isOpen, onClos
     if (isOpen && job?.id) {
       setLoadingMetrics(true);
       setMetricsError(null);
-      axios.get(`http://localhost:5000/jobs/${job.id}/metrics`)
+      axios.get(BASE_URL + `/jobs/${job.id}/metrics`)
         .then(res => {
           setMetrics(res.data.metrics || {});
         })

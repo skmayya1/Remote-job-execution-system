@@ -35,7 +35,7 @@ interface TableContextType {
 
 const TableContext = createContext<TableContextType | undefined>(undefined);
 
-const BASE_URL = "http://localhost:5000"
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ||"http://localhost:5000"
 
 interface TableProviderProps {
   children: ReactNode;

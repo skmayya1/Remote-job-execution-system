@@ -9,6 +9,8 @@ import axios from 'axios';
 import { useTableContext } from '@/context/TableContext';
 import { Textarea } from './ui/textarea';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ||"http://localhost:5000"
+
 
 interface JobFormData {
     label: string;
@@ -49,7 +51,7 @@ const AddJob: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:5000/add', formData, {
+            const response = await axios.post(BASE_URL + '/add', formData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

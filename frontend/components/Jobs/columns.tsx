@@ -14,9 +14,10 @@ import axios from "axios";
 import { useState } from "react";
 import JobLogViewer from "../job-log-viewer";
 import JobDetailsViewer from "../job-details-viewer";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ||"http://localhost:5000"
 
 const cancelJob = async (id:string)=>{
-  await axios.delete("http://localhost:5000/jobs/"+id)
+  await axios.delete(BASE_URL + "/jobs/"+id)
   window.location.reload()
 }
 
