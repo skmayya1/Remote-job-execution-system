@@ -14,7 +14,7 @@
 
     WORKDIR /app/server
     RUN npm install
-    RUN npx tsc --workspace=server
+    RUN npx tsc 
     
     EXPOSE 5000
     
