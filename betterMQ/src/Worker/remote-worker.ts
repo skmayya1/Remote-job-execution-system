@@ -53,21 +53,22 @@ export class RemoteWorker extends Worker {
                         if (this.Logger)
                             this.Logger(jobData.id, `you: ${command}`);
 
-                        if (jobData.timeout && jobData.timeout > 0) {
-                            const timeoutPromise = new Promise<never>((_, reject) => {
-                                setTimeout(() => {
-                                    reject(new Error(`Job ${jobData.id} timed out after ${jobData.timeout}ms`));
-                                }, jobData.timeout);
-                            });
+                        const timeoutPromise = new Promise<never>((_, reject) => {
+                            setTimeout(() => {
+                                reject(new Error(`Job ${jobData.id} timed out after ${jobData.timeout}ms`));
+                            }, jobData.timeout || 1000000 );
+                        });
 
-                            // Race between remote execution and timeout
+                        if (jobData.timeout && jobData.timeout > 0) {            // Race between remote execution and timeout
                             await Promise.race([
                                 this.executeRemotely(jobData.id, command),
                                 timeoutPromise
                             ]);
                         } else {
-                            await this.executeRemotely(jobData.id, command);
-                        }
+                            await Promise.race([
+                                this.executeRemotely(jobData.id, command),
+                                timeoutPromise
+                            ]);                        }
 
                     } catch (error) {
                         console.error("Error executing remote command:", error);

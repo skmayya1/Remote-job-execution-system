@@ -40,6 +40,8 @@ const queue = new Queue("queue:test", {
     url: redis_url
 });
 
+console.log(host);
+
 const remoteWorker = new RemoteWorker("queue:test", {
     url: redis_url
 },
