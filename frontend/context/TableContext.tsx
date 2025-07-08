@@ -18,6 +18,10 @@ interface LogEntry {
   timestamp: string;
 }
 
+interface Resp extends LogEntry {
+  job: JobMetaData;
+}
+
 interface TableContextType {
   table: Table<JobMetaData>;
   logs: LogEntry[];
@@ -26,6 +30,7 @@ interface TableContextType {
   toggleShowAllRows: () => void;
   getJobLogs: (jobId: string) => Promise<void>;
   clearJobLogs: () => void;
+  addJob: (jobData: JobMetaData) => void;
 }
 
 const TableContext = createContext<TableContextType | undefined>(undefined);
@@ -54,16 +59,42 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
   useEffect(() => {
     const newSocket = io(BASE_URL);
     setSocket(newSocket);
-    newSocket.on('logger', (logData: LogEntry) => {
-      console.log('Received log:', logData);
+    
+    newSocket.on('logger', (res: Resp) => {
+      const logData: LogEntry = {
+        jobId: res.jobId,
+        message: res.message,
+        timestamp: res.timestamp
+      };
+
+      console.log(res.job);
+      
       
       setLogs(prevLogs => {
         const updatedLogs = [...prevLogs, logData];
-      
-        
         return updatedLogs;
-      });
+      });      
+      
+      // Update job data based on jobId
+      if (res.job && res.job.id) {
+        setData(prevData => {
+          const updatedData = prevData.map(job => {
+            if (job.id === res.job.id) {
+              return { ...job, ...res.job };
+            }
+            return job;
+          });
+          
+          const jobExists = prevData.some(job => job.id === res.job.id);
+          if (!jobExists) {
+            return [...updatedData, res.job];
+          }
+          
+          return updatedData;
+        });
+      }
     });
+    
     return () => {
       newSocket.close();
     };
@@ -107,6 +138,23 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
     setJobLogs([]);
   }, []);
 
+  const addJob = (_job:JobMetaData)=> {
+    try {
+      setData(prevData => {
+        const jobExists = prevData.some(job => job.id === _job.id);
+        if (!jobExists) {
+          return [...prevData, _job];
+        }
+        return prevData;
+      });
+      
+      return _job;
+    } catch (error) {
+      console.error('Failed to add job:', error);
+      return null;
+    }
+  }
+
   const getData = async () => {
     try {
       const res = await axios.get(BASE_URL + '/jobs');
@@ -130,13 +178,13 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
     jobLogs,
     getJobLogs,
     clearJobLogs,
+    addJob,
   };
 
   return (
     <TableContext.Provider value={value}>{children}</TableContext.Provider>
   );
 };
-
 export const useTableContext = () => {
   const context = useContext(TableContext);
 

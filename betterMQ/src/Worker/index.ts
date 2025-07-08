@@ -28,7 +28,6 @@ export abstract class Worker extends BaseMQClient {
         if (priorityJob.length > 0) {
             return priorityJob[0] as string
         }
-
         const waitJob = await this.redis.blpop(`${this.queueName}:wait`, 1);
         if (waitJob) {
             return waitJob[1];

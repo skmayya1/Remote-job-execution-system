@@ -29,17 +29,17 @@ export class Queue extends BaseMQClient {
             ? `${this.queueName}:priority`
             : `${this.queueName}:wait`;
 
-        //job is pushed into queue
+            const metadataKey = `job:data:${jobPayload.id}`;
+
+        const multi = this.redis.multi();
+
         if (jobPayload.priority > 0) {
-            await this.redis.zadd(queueKey, jobPayload.priority, jobData);
+            multi.zadd(queueKey, jobPayload.priority, jobData);
         } else {
-            await this.redis.rpush(queueKey, jobData);
+            multi.rpush(queueKey, jobData);
         }
-
-        // Store metadata properly
-        const metadataKey = `job:data:${jobPayload.id}`;
-
-        await this.redis.hmset(metadataKey, {
+        
+        multi.hmset(metadataKey, {
             id: jobPayload.id,
             name: jobPayload.name,
             priority: jobPayload.priority.toString(),
@@ -50,6 +50,8 @@ export class Queue extends BaseMQClient {
             delay: (jobPayload.delay ?? 0).toString(),
             status: "waiting"
         });
+        
+        await multi.exec();
 
         return jobPayload.id;
     }

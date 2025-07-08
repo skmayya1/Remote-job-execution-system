@@ -27,7 +27,7 @@ const LogViewer: React.FC = () => {
                 <DialogHeader>
                     <DialogTitle>Logs</DialogTitle>
                 </DialogHeader>
-                <div className="w-full h-[400px] flex flex-col gap-2">
+                <div className="w-full h-[400px] flex flex-col gap-2 overflow-auto">
                     {
                         showDot ? logs.map((log, idx) => (
                             <div  key={idx}>

@@ -1,41 +1,36 @@
+import axios from "axios";
 
-import axios from "axios"
+const JOB_LABEL = "race-check";
+const POST_URL = "http://localhost:5000/add";
 
-const commands = [
-  "echo Job 1",
-  "sleep 2",
-  "echo Job 3",
-  "sleep 1",
-  "ls -la",
-  "echo Job 6",
-  "sleep 3",
-  "echo Job 8",
-  "sleep 4",
-  "date"
-];
+// Simulated worker logic
+const simulateWorker = async ( ) => {
 
-async function sendJob(index, command) {
+
   try {
-    const response = await axios.post("http://localhost:3000/add", {
-      label: `job-${index + 1}`,
-      payload: {
-        data: command
-      },
-      priority: index % 5,         // priority from 0 to 4
+    const response = await axios.post(POST_URL, {
+      label: JOB_LABEL,
+      payload: "sleep 5 && echo Done",
+      priority: 0,
       attempts: 1,
-      timeout: 10000,
-      delay: 0
+      timeout: 10000
     });
-    console.log(`Job ${index + 1} added:`, response.data.jobs.id);
-  } catch (err) {
-    console.error(`Job ${index + 1} failed:`, err.message);
+
+    console.log(`ob submitted:`, response.data?.jobs?.jobId || response.data);
+  } catch (error) {
+    console.error(`failed to submit:`, error.response?.data || error.message);
   }
-}
+};
 
-async function runJobs() {
-  const promises = commands.map((cmd, index) => sendJob(index, cmd));
-  await Promise.all(promises);
-  console.log("All jobs dispatched!");
-}
+const main = async () => {
+  console.log("=== Submitting race test job concurrently ===");
+  await Promise.all([
+    simulateWorker(),
+    simulateWorker(),  
+    simulateWorker(),
+    simulateWorker(),
+    simulateWorker(),
+  ]);
+};
 
-runJobs();
+main();

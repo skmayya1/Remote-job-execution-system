@@ -6,6 +6,8 @@ import { IoMdAdd } from 'react-icons/io';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import axios from 'axios';
+import { useTableContext } from '@/context/TableContext';
+import { Textarea } from './ui/textarea';
 
 
 interface JobFormData {
@@ -32,7 +34,9 @@ const AddJob: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { addJob } = useTableContext()
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -54,6 +58,8 @@ const AddJob: React.FC = () => {
             const data: JobResponse = response.data;
             console.log('Job added successfully:', data);
 
+            addJob(data.jobs)
+
             // Reset form
             setFormData({
                 label: '',
@@ -65,8 +71,6 @@ const AddJob: React.FC = () => {
 
             // Close dialog
             setIsOpen(false);
-
-            window.location.reload();
 
 
 
@@ -108,10 +112,10 @@ const AddJob: React.FC = () => {
 
                             <div className="grid gap-3">
                                 <Label htmlFor="payload">Payload</Label>
-                                <Input
+                                <Textarea
+                                className='resize-none max-h-[200px]'
                                     id="payload"
                                     name="payload"
-                                    type="text"
                                     placeholder="ls -a"
                                     value={formData.payload}
                                     onChange={handleInputChange}
@@ -133,10 +137,6 @@ const AddJob: React.FC = () => {
                                     onChange={handleInputChange}
                                 />
                             </div>
-
-
-
-
                             <div className="grid gap-3">
                                 <Label htmlFor="timeout">
                                     Timeout (ms)
@@ -148,21 +148,6 @@ const AddJob: React.FC = () => {
                                     type="number"
                                     placeholder="5000"
                                     value={formData.timeout}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-
-                            <div className="grid gap-3">
-                                <Label htmlFor="delay">
-                                    Delay (ms)
-                                    <p className='text-muted-foreground text-xs'>optional</p>
-                                </Label>
-                                <Input
-                                    id="delay"
-                                    name="delay"
-                                    type="number"
-                                    placeholder="0"
-                                    value={formData.delay}
                                     onChange={handleInputChange}
                                 />
                             </div>

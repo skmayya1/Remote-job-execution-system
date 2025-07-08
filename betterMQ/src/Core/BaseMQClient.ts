@@ -74,6 +74,11 @@ export class BaseMQClient {
             status: status
         };
 
+        console.log(updates);
+        console.log(status);
+        
+        
+
         // Set startedAt when job becomes active (starts processing)
         if (status === 'active') {
             updates["startedAt"] = new Date().toISOString();

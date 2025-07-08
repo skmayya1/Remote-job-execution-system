@@ -1,8 +1,7 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Queue, RemoteWorker, Worker } from "bettermq";
-import { exec } from "child_process";
-import { promisify } from "util";
+
 import fs from "fs";
 import path from "path";
 import cors from "cors";
@@ -10,7 +9,6 @@ import { createServer } from "http";
 import { Server } from 'socket.io';
 import dotenv from "dotenv"
 
-const execAsync = promisify(exec);
 
 const privateKey = fs.readFileSync(path.resolve(__dirname, "../src/sk-remote.pem"));
 
@@ -54,28 +52,19 @@ const remoteWorker = new RemoteWorker("queue:test", {
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
     
-    // Join specific job rooms for targeted log emission
-    socket.on('join-job', (jobId: string) => {
-        socket.join(`job-${jobId}`);
-        console.log(`Client ${socket.id} joined job room: job-${jobId}`);
-    });
-    
-    // Leave job rooms
-    socket.on('leave-job', (jobId: string) => {
-        socket.leave(`job-${jobId}`);
-        console.log(`Client ${socket.id} left job room: job-${jobId}`);
-    });
-    
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
     });
 });
 
-remoteWorker.on((id: string, log: string ) => {
-    console.log("remote::id:" + id, log);
+remoteWorker.on(async (id: string, log: string ) => {
+    
+    const job = await remoteWorker.getJobMetadata(id)
+    
     io.emit('logger', {
         jobId: id,
         message: log,
+        job,
         timestamp: new Date().toISOString()
     });
 });
@@ -96,12 +85,8 @@ app.post("/add", async (req: Request, res: Response) => {
 
         const jobs = await queue.getJobMetadata(job);
 
-        // Emit job creation event
-        io.emit('job-created', {
-            jobId: job,
-            jobData: jobs,
-            timestamp: new Date().toISOString()
-        });
+        console.log(jobs);
+        
 
         res.status(201).json({ jobs });
 
@@ -174,11 +159,25 @@ app.get("/jobs/:id/logs", async (req: Request, res: Response) => {
     }
 });
 
+function getRedisClient() {
+    // @ts-ignore
+    return queue.redis;
+}
+
+// Get job metrics
+app.get("/jobs/:id/metrics", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const redis = getRedisClient();
+        const metrics = await redis.hgetall(`job:metrics:${id}`);
+        res.json({ metrics });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to get job metrics" });
+    }
+});
 
 
-
-// Use httpServer instead of app for listening
-httpServer.listen(5000, () => {
+httpServer.listen(6000, () => {
     console.log("Server running on port 5000");
     console.log("Socket.IO server initialized");
 });
